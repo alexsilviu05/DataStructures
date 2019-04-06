@@ -1,0 +1,89 @@
+#pragma warning(disable:4996)
+#include<iostream>
+#include<malloc.h>
+#include<string>
+
+struct Factura {
+	char* serieFac;
+	char dataEmiterii[10];
+	char client[50];
+	float factura;
+};
+
+struct nod {
+	Factura info;
+	nod* next;
+};
+
+Factura createFactura(const char* serieFac, const char dataEmiterii[10], const char client[50], float factura) {
+	Factura f;
+	f.serieFac = (char*)malloc(sizeof(char)*(strlen(serieFac) + 1));
+	strcpy(f.serieFac, serieFac);
+	strcpy(f.dataEmiterii, dataEmiterii);
+	strcpy(f.client, client);
+	f.factura = factura;
+	return f;
+}
+
+void displayFactura(Factura f) {
+	printf("%s %s %s %f\n", f.serieFac, f.dataEmiterii, f.client, f.factura);
+}
+
+nod* createNewNode(Factura f, nod* next) {
+	nod* p = (nod*)malloc(sizeof(nod));
+	p->info = f;
+	p->info.serieFac = (char*)malloc(sizeof(char)*(strlen(f.serieFac) + 1));
+	strcpy(p->info.serieFac, f.serieFac);
+	p->next = next;
+	return p;
+}
+
+nod* inserareSfarsit(Factura f, nod* head) {
+	nod* nou = createNewNode(f, NULL);
+	if (head) {
+		nod* temp = head;
+		while (temp->next)
+			temp = temp->next;
+		temp->next = nou;
+	}
+	else {
+		head = nou;
+	}
+	return head;
+
+}
+
+void showList(nod* head) {
+	while (head) {
+		displayFactura(head->info);
+		head = head->next;
+	}
+}
+
+void showData(nod* head, const char data[10]) {
+	int count = 0;
+
+	while (head) {
+		if (strcmp(head->info.dataEmiterii, data))
+			count++;
+		head = head->next;
+	}
+	printf("%d times", count);
+}
+
+
+void main() {
+	Factura f1 = createFactura("DFE4612348", "06.06.2018", "randunica srl", 3500);
+	Factura f2 = createFactura("DFE4612348", "06.06.2018", "randunica srl", 2500);
+	Factura f3 = createFactura("DFE4612348", "06.06.2018", "randunica srl", 1500);
+
+	nod* head = NULL;
+
+	head = inserareSfarsit(f1, head);
+	head = inserareSfarsit(f2, head);
+	head = inserareSfarsit(f3, head);
+
+	showList(head);
+	showData(head, "06.06.2018");
+	system("pause");
+}
