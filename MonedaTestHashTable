@@ -1,0 +1,162 @@
+#pragma warning(disable : 4996)
+#include<iostream>
+
+struct Moneda {
+	char cod[10];
+	char* denumire;
+	char* emitent;
+	int sold;
+};
+
+struct node {
+	node* next;
+	Moneda info;
+};
+
+struct HashTable {
+	node** vector;
+	int size;
+};
+
+Moneda creareMoneda(const char* cod, const char* nume, const char* emitent, int sold) {
+	Moneda m;
+	strcpy(m.cod, cod);
+	m.denumire = (char*)malloc(sizeof(char)*(strlen(nume) + 1));
+	strcpy(m.denumire, nume);
+	m.emitent = (char*)malloc(sizeof(char)*(strlen(emitent) + 1));
+	strcpy(m.emitent, emitent);
+	m.sold = sold;
+	return m;
+}
+
+int getHashCode(char* code, int size) {
+	int s = 0;
+	for (int i = 0; i < size; i++) {
+		s = s + code[i];
+	}
+	return s % size;
+}
+
+HashTable initHash(int size) {
+	HashTable ht;
+	ht.vector = (node**)malloc(sizeof(node*)*size);
+	for (int i = 0;i < size; i++) {
+
+		ht.vector[i] = NULL;
+	}
+	ht.size = size;
+	return ht;
+}
+node* createNode(Moneda m, node* next) {
+	node* newNode = (node*)malloc(sizeof(node));
+	strcpy(newNode->info.cod , m.cod);
+	newNode->info.denumire = (char*)malloc(sizeof(char)*(strlen(m.denumire) + 1));
+	strcpy(newNode->info.denumire, m.denumire);
+	newNode->info.emitent = (char*)malloc(sizeof(char)*(strlen(m.emitent) + 1));
+	strcpy(newNode->info.emitent, m.emitent);
+	newNode->info.sold = m.sold;
+	newNode->next = next;
+	return newNode;
+	
+}
+node* insertEnd(node* head, Moneda m)
+{  node* newNode = createNode(m, NULL);
+	if (head) {
+		node* p = head; 
+		while (p->next) {
+			p = p->next;
+			}
+		p->next = newNode;
+		return head;
+	}
+	else {
+		return newNode;
+	}
+	
+}
+int insertintoHashTable(HashTable ht, Moneda m) {
+	if (ht.vector) {
+		int hashCode = getHashCode(m.cod, ht.size);
+		if (ht.vector[hashCode]) {
+			ht.vector[hashCode] = insertEnd(ht.vector[hashCode], m);
+			return hashCode;
+		}
+		else {
+			ht.vector[hashCode] = createNode(m, NULL);
+			return hashCode;
+		}
+
+	}
+	else {
+		return -1;
+	}
+}
+void printMoneda(Moneda m) {
+	printf("Moneda %s %s %s %d \n", m.cod, m.denumire, m.emitent, m.sold);
+}
+void printHash(HashTable ht) {
+	
+		for (int i = 0; i < ht.size; i++) {
+			node* p = ht.vector[i];
+			while (p) {
+				printMoneda(p->info);
+				p = p->next;
+			}
+		}
+	
+}
+void soldSpecificat(HashTable ht, int soldCautat) {
+	for (int i = 0; i < ht.size; i++) {
+			node* p = ht.vector[i];
+			while (p) {
+				if (p->info.sold > soldCautat)
+				{
+
+					printMoneda(p->info);
+				}
+				p = p->next;
+			}
+
+
+			
+		}
+	
+}
+
+void modificareSold(HashTable ht, const char* cod, int value) {
+	for (int i = 0; i < ht.size; i++) {
+		node* p = ht.vector[i];
+		while (p) {
+			if (strcmp(p->info.cod, cod) == 0) {
+				p->info.sold = value;
+			}
+			p = p->next;
+		}
+	}
+}
+
+void main() {
+	HashTable ht;
+	ht = initHash(7);
+	Moneda m1 = creareMoneda("RON", "leu romaesc", "Romania", 89754);
+	Moneda m2 = creareMoneda("EURO", "tot euro", "Olanda", 54782);
+	Moneda m3 = creareMoneda("Lira", "lira sterlina", "Anglia", 34587);
+	Moneda m4 = creareMoneda("Lira2", "lira turceasca", "Turcia", 54782);
+	Moneda m5 = creareMoneda("Franc", "franc elvetian", "Elvetia", 777448);
+	insertintoHashTable(ht, m1);
+	insertintoHashTable(ht, m2);
+	insertintoHashTable(ht, m3);
+	insertintoHashTable(ht, m4);
+	insertintoHashTable(ht, m5);
+	printHash(ht);
+	int soldCautatval = 54782;
+	printf("\n____________\n");
+	printf("monedele cu soldul mai mare dect 54782 \n");
+	soldSpecificat(ht, soldCautatval);
+	printf("\n____________\n");
+	printf("Se modifica soldul pentru modele din tabela cu valorea specificata\n ");
+	int valoare = 33333;
+	//modificareSold(ht, m2, valoare);
+	printHash(ht);
+	system("pause");
+}
